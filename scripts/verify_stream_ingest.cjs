@@ -10,6 +10,8 @@
  *   V5 ohc schema=2 且字段齐备
  *   V6 /config 端点存在
  *   V7 打包清单齐全
+ *   V8 代理靠注册支持：manifest 声明 proxy_support；插件不私存 proxyUrl；
+ *      只读 daemon 注入的 ORIG_PLUGIN_PROXY（BUG-907 / M10/M11）
  *
  * 注意：本脚本不含任何具体站点域名。脱敏检测用「字面量 http(s)://host」启发式，
  * 允许 127.0.0.1/localhost/占位符，其余非空 host 一律判为疑似站点特征。
@@ -107,6 +109,21 @@ function main() {
   ok('V7 UI form 有 baseUrl 字段', uiCfg.fields.some((f) => f.key === 'baseUrl'))
   ok('V7 UI layout 合法', ['table', 'detail', 'form', 'dashboard'].includes(uiCfg.layout))
 
+  // V8 代理注册支持（M11 判据 2/4/6）：清单声明 + 宿主注入，插件零私有代理字段。
+  const manifest = read('plugin.toml')
+  ok('V8 manifest 声明 proxy_support=optional', /proxy_support\s*=\s*"optional"/.test(manifest))
+  ok('V8 UI 配置表单不含 proxyUrl', !uiCfg.fields.some((f) => f.key === 'proxyUrl'))
+  ok(
+    'V8 config 不私存代理值',
+    !/proxyUrl:\s*['"]|parsed\.proxyUrl|get\(['"]proxyUrl['"]/.test(cfgSrc),
+  )
+  ok('V8 代理只读 daemon 注入 ORIG_PLUGIN_PROXY', /ORIG_PLUGIN_PROXY/.test(cfgSrc))
+  for (const f of ['lib/site.js', 'lib/ingest.js']) {
+    ok(`V8 ${f} 用注入值出网`, read(f).includes('cfgLib.proxy()'))
+  }
+  ok('V8 /health 回报注入状态', serverSrc.includes('proxyConfigured'))
+  ok('V8 端口读 ORIG_PLUGIN_PORT', serverSrc.includes('ORIG_PLUGIN_PORT'))
+
   if (TEETH) {
     console.log('\n-- teeth: 注入违规，以下应判红 --')
     let toothFail = 0
@@ -115,6 +132,8 @@ function main() {
     check('teeth-V3 MediaSource 能被抓到', /MediaSource/i.test('const x = new MediaSource()'))
     check('teeth-V5 schema!=2 能被抓到', !/schema:\s*2/.test('schema: 1'))
     check('teeth-V1 host 字面量能被抓到', /https?:\/\/([A-Za-z0-9._-]+)/.test('https://some-site.invalid/x') && !allow.test('some-site'))
+    check('teeth-V8 私有 proxyUrl 能被抓到', /proxyUrl:\s*['"]|parsed\.proxyUrl|get\(['"]proxyUrl['"]/.test("return { baseUrl: '', proxyUrl: '' }"))
+    check('teeth-V8 缺 ORIG_PLUGIN_PROXY 能被抓到', !/ORIG_PLUGIN_PROXY/.test("return { baseUrl: '' }"))
     if (toothFail > 0) {
       console.log(`\nverify: TEETH FAILED (${toothFail} red-miss)`)
       process.exit(1)

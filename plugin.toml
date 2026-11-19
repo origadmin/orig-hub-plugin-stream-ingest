@@ -1,6 +1,6 @@
 id = "stream-ingest"
 label = "在线流入库"
-version = "0.1.0"
+version = "0.2.0"
 kind = "service"
 provides = ["tasks", "health"]
 proxy_support = "optional"

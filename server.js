@@ -21,7 +21,9 @@ const site = require('./lib/site')
 const ingest = require('./lib/ingest')
 const { mask } = require('./lib/hls')
 
-const PORT = Number(process.env.STREAM_INGEST_PORT || 19814)
+// daemon 注入 ORIG_PLUGIN_PORT（与 manifest [service].base_url 同一端口），
+// STREAM_INGEST_PORT 仅作独立调试兜底；不再固定 19814，多插件并行不撞端口。
+const PORT = Number(process.env.ORIG_PLUGIN_PORT || process.env.STREAM_INGEST_PORT || 19814)
 const HOST = '127.0.0.1'
 
 function send(res, code, obj) {
@@ -66,9 +68,13 @@ async function route(req, res) {
     }
     if (p === '/health' && method === 'GET') {
       const configured = cfgLib.isConfigured(cfg)
+      // M6：代理来自 daemon 注入，只回报「有没有 / 来自哪份」，不回显地址（可能含凭据）。
       return send(res, 200, {
         available: true,
         configured,
+        proxyConfigured: Boolean(cfgLib.proxy()),
+        proxySource: cfgLib.proxySource(),
+        port: PORT,
         reason: configured ? '' : 'baseUrl not set; user must input site home address',
       })
     }

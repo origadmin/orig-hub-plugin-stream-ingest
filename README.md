@@ -25,11 +25,12 @@ orig-hub 的通用 service 型插件：把「网页 HLS 流」经本机处理后
     "detail": "/api/videos/{id}",
     "playback": "/api/videos/{id}/episodes/{ep}/playback"
   },
-  "proxyUrl": "",                // 可选：出网代理，形如 http://127.0.0.1:端口
   "headers": {},                 // 可选：附加请求头（如站点要求的 token）
   "outputDir": ""                // 可选：产物根目录，缺省插件数据目录/output
 }
 ```
+
+代理**不在本配置里**：插件清单只声明 `proxy_support = "optional"`，代理地址由 hub「网络与代理」里动态生成的插件通道统一保存；daemon 在启动插件时注入 `ORIG_PLUGIN_PROXY` / `ORIG_PLUGIN_PROXY_SOURCE`，插件只读注入值出网。`/health` 会回报 `proxyConfigured` / `proxySource`，不回显地址本身。
 
 `{id}` / `{ep}` 是路径模板占位符，按目标站点实际结构修改。鉴权头名/值由 playback 响应给出，插件透传，不写死。
 
@@ -39,7 +40,7 @@ orig-hub 的通用 service 型插件：把「网页 HLS 流」经本机处理后
 |---|---|---|---|
 | GET | `/config` | — | 当前配置（扁平键） |
 | POST | `/config` | 配置对象 | 保存后的配置 |
-| GET | `/health` | — | `{available, configured, reason}` |
+| GET | `/health` | — | `{available, configured, proxyConfigured, proxySource, port, reason}` |
 | GET | `/list?page=1` | — | `{items:[{id,title,score,episodeCount,playAt,desc,cover}]}` |
 | GET | `/detail?id=` | — | `{id,title,desc,cover,episodes:[{ep,title,duration}]}` |
 | GET | `/tasks` | — | `{rows:[ActivityTask]}` |

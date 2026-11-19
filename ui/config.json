@@ -7,8 +7,7 @@
     { "key": "baseUrl", "label": "站点主页地址（可变，手动输入）", "type": "text" },
     { "key": "paths.list", "label": "列表路径模板", "type": "text" },
     { "key": "paths.detail", "label": "详情路径模板（{id} 为占位符）", "type": "text" },
-    { "key": "paths.playback", "label": "播放路径模板（{id}/{ep} 为占位符）", "type": "text" },
-    { "key": "proxyUrl", "label": "出网代理（可选，形如 http://127.0.0.1:端口）", "type": "text" }
+    { "key": "paths.playback", "label": "播放路径模板（{id}/{ep} 为占位符）", "type": "text" }
   ],
   "actions": [
     { "id": "save", "label": "保存配置", "method": "POST", "path": "/api/plugin/stream-ingest/config" }
