@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "kind": "service",
+  "capabilities": ["tasks", "health"],
+  "notes": "Generic web-HLS ingest: user supplies baseUrl at runtime. No site-specific data in this package."
+}

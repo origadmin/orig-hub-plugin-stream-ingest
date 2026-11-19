@@ -1,0 +1,17 @@
+{
+  "id": "stream-ingest-list",
+  "title": "在线流入库 · 浏览",
+  "layout": "table",
+  "dataSource": { "path": "/api/plugin/stream-ingest/list?page=1", "pagination": false },
+  "columns": [
+    { "key": "id", "label": "ID", "type": "text" },
+    { "key": "title", "label": "标题", "type": "text" },
+    { "key": "score", "label": "评分", "type": "number" },
+    { "key": "episodeCount", "label": "集数", "type": "number" },
+    { "key": "playAt", "label": "更新", "type": "text" }
+  ],
+  "actions": [
+    { "id": "prepare", "label": "播放", "method": "POST", "path": "/api/plugin/stream-ingest/prepare", "body": { "id": "$row.id", "ep": 1 } },
+    { "id": "ingest", "label": "入库", "method": "POST", "path": "/api/plugin/stream-ingest/ingest", "body": { "id": "$row.id" } }
+  ]
+}

@@ -1,0 +1,12 @@
+id = "stream-ingest"
+label = "在线流入库"
+version = "0.1.0"
+kind = "service"
+provides = ["tasks", "health"]
+proxy_support = "optional"
+entry = "node server.js"
+ui = "ui/list.json"
+
+[service]
+base_url = "http://127.0.0.1:19814"
+timeout_ms = 5000
