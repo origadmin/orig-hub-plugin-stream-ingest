@@ -2,7 +2,7 @@ node_modules/
 .stream-ingest-data/
 *.ohplug
 *.zip
-config.json
+/config.json
 *.ts
 *.log
 output/
